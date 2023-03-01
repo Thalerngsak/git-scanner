@@ -7,7 +7,7 @@ type ResultRequest struct {
 	Status        string    `json:"status"`
 	RepositoryID  string    `json:"repository_id"`
 	RepositoryURL string    `json:"repository_url"`
-	Findings      []string  `json:"findings"`
+	Findings      []Finding `json:"findings"`
 	EnqueuedAt    time.Time `json:"enqueued_at"`
 	StartedAt     time.Time `json:"started_at"`
 	FinishedAt    time.Time `json:"finished_at"`
@@ -18,10 +18,15 @@ type ResultResponse struct {
 	Status        string    `json:"status"`
 	RepositoryID  string    `json:"repository_id"`
 	RepositoryURL string    `json:"repository_url"`
-	Findings      []string  `json:"findings"`
+	Findings      []Finding `json:"findings"`
 	EnqueuedAt    time.Time `json:"enqueued_at"`
 	StartedAt     time.Time `json:"started_at"`
 	FinishedAt    time.Time `json:"finished_at"`
+}
+
+type Finding struct {
+	Category string `json:"category"`
+	Message  string `json:"message"`
 }
 
 type ResultService interface {

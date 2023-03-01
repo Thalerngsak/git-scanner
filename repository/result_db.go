@@ -12,11 +12,11 @@ type resultStore struct {
 	collection *mongo.Collection
 }
 
-func NewResultDB(collection *mongo.Collection) resultStore {
-	return resultStore{collection: collection}
+func NewResultDB(collection *mongo.Collection) ResultStore {
+	return &resultStore{collection: collection}
 }
 
-func (s *resultStore) Create(res *Result) error {
+func (s *resultStore) Create(res Result) error {
 	_, err := s.collection.InsertOne(context.Background(), res)
 	if err != nil {
 		return errors.New("failed to create result")
@@ -24,19 +24,19 @@ func (s *resultStore) Create(res *Result) error {
 	return nil
 }
 
-func (s *resultStore) GetAll() ([]*Result, error) {
+func (s *resultStore) GetAll() ([]Result, error) {
 	cursor, err := s.collection.Find(context.Background(), bson.M{})
 	if err != nil {
 		return nil, errors.New("failed to get results")
 	}
 	defer cursor.Close(context.Background())
-	var results []*Result
+	var results []Result
 	for cursor.Next(context.Background()) {
 		var res Result
 		if err := cursor.Decode(&res); err != nil {
 			return nil, errors.New("failed to decode result")
 		}
-		results = append(results, &res)
+		results = append(results, res)
 	}
 	return results, nil
 }

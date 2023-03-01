@@ -28,10 +28,7 @@ func main() {
 	repositoryHandler := handler.NewRepositoryHandler(repositoryService)
 
 	resultStoreDB := repository.NewResultDB(resultCollection)
-	_ = resultStoreDB
-	//resultStoreMock := repository.NewResultRepositoryMock()
-
-	resultService := service.NewResultService(&resultStoreDB)
+	resultService := service.NewResultService(resultStoreDB)
 	resultHandler := handler.NewResultHandler(resultService)
 
 	scanHandler := handler.NewScanHandler(repositoryService, resultService)
@@ -52,7 +49,7 @@ func main() {
 	router.DELETE("/repositories/:id", repositoryHandler.DeleteRepository)
 
 	// Endpoint to trigger a scan
-	router.POST("/scan/:id", scanHandler.Scan)
+	router.POST("/scan", scanHandler.Scan)
 
 	// Endpoint to get all results
 	router.GET("/results", resultHandler.GetResult)

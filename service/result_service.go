@@ -13,7 +13,7 @@ func NewResultService(resRepo repository.ResultStore) ResultService {
 }
 
 func (s resultService) Create(request ResultRequest) error {
-	res := &repository.Result{
+	res := repository.Result{
 		ID:            request.ID,
 		Status:        request.Status,
 		RepositoryID:  request.RepositoryID,
@@ -29,15 +29,22 @@ func (s resultService) Create(request ResultRequest) error {
 }
 
 func (s resultService) GetResult() ([]*ResultResponse, error) {
-	repositories, _ := s.resRepo.GetAll()
+	repositories, err := s.resRepo.GetAll()
+	if err != nil {
+		return nil, err
+	}
 	var repos []*ResultResponse
 	for _, v := range repositories {
+		var findings []Finding
+		for _, finding := range v.Findings {
+			findings = append(findings, Finding{Category: finding.Category, Message: finding.Message})
+		}
 		response := &ResultResponse{
 			ID:            v.ID,
 			Status:        v.Status,
 			RepositoryID:  v.RepositoryID,
 			RepositoryURL: v.RepositoryURL,
-			Findings:      v.Findings,
+			Findings:      findings,
 			EnqueuedAt:    v.EnqueuedAt,
 			StartedAt:     v.StartedAt,
 			FinishedAt:    v.FinishedAt,
@@ -46,17 +53,22 @@ func (s resultService) GetResult() ([]*ResultResponse, error) {
 	}
 	return repos, nil
 }
+
 func (s resultService) GetResultByID(id string) (*ResultResponse, error) {
 	response, err := s.resRepo.GetByID(id)
 	if err != nil {
 		return nil, err
+	}
+	var findings []Finding
+	for _, finding := range response.Findings {
+		findings = append(findings, Finding{Category: finding.Category, Message: finding.Message})
 	}
 	res := ResultResponse{
 		ID:            response.ID,
 		Status:        response.Status,
 		RepositoryID:  response.RepositoryID,
 		RepositoryURL: response.RepositoryURL,
-		Findings:      response.Findings,
+		Findings:      findings,
 		EnqueuedAt:    response.EnqueuedAt,
 		StartedAt:     response.StartedAt,
 		FinishedAt:    response.FinishedAt,
@@ -72,12 +84,16 @@ func (s resultService) GetResultByRepositoryID(id string) ([]*ResultResponse, er
 	}
 	var repos []*ResultResponse
 	for _, v := range repositories {
+		var findings []Finding
+		for _, finding := range v.Findings {
+			findings = append(findings, Finding{Category: finding.Category, Message: finding.Message})
+		}
 		response := &ResultResponse{
 			ID:            v.ID,
 			Status:        v.Status,
 			RepositoryID:  v.RepositoryID,
 			RepositoryURL: v.RepositoryURL,
-			Findings:      v.Findings,
+			Findings:      findings,
 			EnqueuedAt:    v.EnqueuedAt,
 			StartedAt:     v.StartedAt,
 			FinishedAt:    v.FinishedAt,
@@ -88,12 +104,16 @@ func (s resultService) GetResultByRepositoryID(id string) ([]*ResultResponse, er
 }
 
 func (s resultService) UpdateResult(request *ResultRequest) error {
+	var findings []repository.Finding
+	for _, finding := range request.Findings {
+		findings = append(findings, repository.Finding{Category: finding.Category, Message: finding.Message})
+	}
 	res := &repository.Result{
 		ID:            request.ID,
 		Status:        request.Status,
 		RepositoryID:  request.RepositoryID,
 		RepositoryURL: request.RepositoryURL,
-		Findings:      request.Findings,
+		Findings:      findings,
 		EnqueuedAt:    request.EnqueuedAt,
 		FinishedAt:    request.FinishedAt,
 	}

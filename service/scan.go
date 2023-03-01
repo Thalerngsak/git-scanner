@@ -3,8 +3,7 @@ package service
 import "time"
 
 type ScanRequest struct {
-	Name string `json:"name" binding:"required"`
-	URL  string `json:"url" binding:"required"`
+	ID string `json:"id" binding:"required"`
 }
 
 type ScanResponse struct {
