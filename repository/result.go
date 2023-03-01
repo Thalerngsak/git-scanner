@@ -8,16 +8,21 @@ type Result struct {
 	Status        string    `bson:"status"`
 	RepositoryID  string    `bson:"repository_id"`
 	RepositoryURL string    `bson:"repository_url"`
-	Findings      []string  `bson:"findings"`
+	Findings      []Finding `bson:"findings"`
 	EnqueuedAt    time.Time `bson:"enqueued_at"`
 	StartedAt     time.Time `bson:"started_at"`
 	FinishedAt    time.Time `bson:"finished_at"`
 }
 
+type Finding struct {
+	Category string `json:"category"`
+	Message  string `json:"message"`
+}
+
 // ResultStore is an interface for storing and retrieving security scan results
 type ResultStore interface {
-	Create(*Result) error
-	GetAll() ([]*Result, error)
+	Create(Result) error
+	GetAll() ([]Result, error)
 	GetByID(string) (*Result, error)
 	GetByRepositoryID(id string) ([]*Result, error)
 	Update(r *Result) error

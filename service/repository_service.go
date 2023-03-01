@@ -2,7 +2,6 @@ package service
 
 import (
 	"github.com/google/uuid"
-	"github.com/thalerngsak/git-scanner/errs"
 	"github.com/thalerngsak/git-scanner/repository"
 )
 
@@ -23,7 +22,7 @@ func (s repositoryService) NewRepository(request RepositoryRequest) (*Repository
 	}
 
 	if err := s.resRepo.Create(repositories); err != nil {
-		return nil, errs.NewUnexpectedError()
+		return nil, err
 	}
 
 	response := &RepositoryResponse{
@@ -36,7 +35,10 @@ func (s repositoryService) NewRepository(request RepositoryRequest) (*Repository
 }
 
 func (s repositoryService) GetRepository() ([]*RepositoryResponse, error) {
-	repositories, _ := s.resRepo.GetAll()
+	repositories, err := s.resRepo.GetAll()
+	if err != nil {
+		return nil, err
+	}
 	var repos []*RepositoryResponse
 	for _, v := range repositories {
 		response := &RepositoryResponse{

@@ -25,8 +25,12 @@ func NewScanHandler(resultSrv service.RepositoryService, resSrv service.ResultSe
 }
 
 func (h scanHandler) Scan(c *gin.Context) {
-	id := c.Param("id")
-	repositories, err := h.repSrv.GetRepositoryByID(id)
+	var r service.ScanRequest
+	if err := c.BindJSON(&r); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	repositories, err := h.repSrv.GetRepositoryByID(r.ID)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 		return
@@ -65,14 +69,14 @@ func scanRepository(res *service.ResultRequest, url string, resultStore service.
 	if err != nil {
 		res.Status = "Failure"
 		res.FinishedAt = time.Now()
-		res.Findings = append(res.Findings, fmt.Sprintf("Failed to clone repository: %s", err))
+		res.Findings = append(res.Findings, service.Finding{Category: "Secret", Message: fmt.Sprintf("Failed to clone repository: %s", err)})
 		if err := resultStore.UpdateResult(res); err != nil {
 			log.Println(err)
 		}
 		return
 	}
 	// Scan repository for secrets
-	var findings []string
+	var findings []service.Finding
 	err = filepath.Walk(repoDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -89,7 +93,7 @@ func scanRepository(res *service.ResultRequest, url string, resultStore service.
 				for scanner.Scan() {
 					text := scanner.Text()
 					if strings.Contains(text, "public_key") || strings.Contains(text, "private_key") {
-						findings = append(findings, fmt.Sprintf("Found secret in file %s, line %d", file.Name(), line))
+						findings = append(findings, service.Finding{Category: "Secret", Message: fmt.Sprintf("Found secret in file %s, line %d", file.Name(), line)})
 					}
 					line++
 				}
@@ -101,7 +105,7 @@ func scanRepository(res *service.ResultRequest, url string, resultStore service.
 	if err != nil {
 		res.Status = "Failure"
 		res.FinishedAt = time.Now()
-		res.Findings = append(res.Findings, fmt.Sprintf("Failed to scan repository: %s", err))
+		res.Findings = append(res.Findings, service.Finding{Category: "Secret", Message: fmt.Sprintf("Failed to clone repository: %s", err)})
 		if err := resultStore.UpdateResult(res); err != nil {
 			log.Println(err)
 		}
