@@ -82,7 +82,7 @@ func scanRepository(res *service.ResultRequest, url string, resultStore service.
 			return err
 		}
 		if !info.IsDir() {
-			if strings.HasSuffix(info.Name(), ".java") {
+			if strings.HasSuffix(info.Name(), ".*") {
 				file, err := os.Open(path)
 				if err != nil {
 					return err
