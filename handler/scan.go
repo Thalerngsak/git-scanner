@@ -82,21 +82,19 @@ func scanRepository(res *service.ResultRequest, url string, resultStore service.
 			return err
 		}
 		if !info.IsDir() {
-			if strings.HasSuffix(info.Name(), ".*") {
-				file, err := os.Open(path)
-				if err != nil {
-					return err
+			file, err := os.Open(path)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+			scanner := bufio.NewScanner(file)
+			line := 1
+			for scanner.Scan() {
+				text := scanner.Text()
+				if strings.Contains(text, "public_key") || strings.Contains(text, "private_key") {
+					findings = append(findings, service.Finding{Category: "Secret", Message: fmt.Sprintf("Found secret in file %s, line %d", file.Name(), line)})
 				}
-				defer file.Close()
-				scanner := bufio.NewScanner(file)
-				line := 1
-				for scanner.Scan() {
-					text := scanner.Text()
-					if strings.Contains(text, "public_key") || strings.Contains(text, "private_key") {
-						findings = append(findings, service.Finding{Category: "Secret", Message: fmt.Sprintf("Found secret in file %s, line %d", file.Name(), line)})
-					}
-					line++
-				}
+				line++
 			}
 		}
 		return nil
