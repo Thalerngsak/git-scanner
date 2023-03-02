@@ -63,7 +63,7 @@ func (h repositoryHandler) UpdateRepository(c *gin.Context) {
 	}
 
 	if err := h.repSrv.UpdateRepository(id, r); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, r)

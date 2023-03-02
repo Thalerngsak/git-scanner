@@ -21,7 +21,7 @@ func main() {
 	db := client.Database(viper.GetString("db.database"))
 	// Initialize repository and result stores
 	repositoryCollection := db.Collection("repositories")
-	resultCollection := db.Collection("results")
+	resultCollection := db.Collection("scan_results")
 
 	repositoryStore := repository.NewRepositoryDB(repositoryCollection)
 	repositoryService := service.NewRepositoryService(&repositoryStore)
@@ -49,10 +49,10 @@ func main() {
 	router.DELETE("/repositories/:id", repositoryHandler.DeleteRepository)
 
 	// Endpoint to trigger a scan
-	router.POST("/scan", scanHandler.Scan)
+	router.POST("/scan-results", scanHandler.Scan)
 
 	// Endpoint to get all results
-	router.GET("/results", resultHandler.GetResult)
+	router.GET("/scan-results", resultHandler.GetResult)
 
 	// Endpoint to get results by repository ID
 	router.GET("/results/repository/:id", resultHandler.GetResultByRepositoryID)
