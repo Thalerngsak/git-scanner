@@ -60,7 +60,7 @@ func (s *repositoryStore) Update(r *Repository) error {
 		return errs.NewUnexpectedError()
 	}
 	if result.ModifiedCount == 0 {
-		return errors.New("no repository updated")
+		return errs.NewValidationError("no repository updated")
 	}
 	return nil
 }
